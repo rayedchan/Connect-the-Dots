@@ -1,0 +1,21 @@
+/*
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+*/
+/* 
+    Created on : May 14, 2015, 10:16:36 PM
+    Author     : rayedchan
+*/
+
+/* Place button on the bottom center of the page and adjust size of submit button */ 
+.button
+{
+    position: absolute;
+    bottom: 5%;
+    left: 50%;
+    margin-left:-95px;
+    height: 40px;
+    width: 180px;
+    font-size: 20px;
+}
