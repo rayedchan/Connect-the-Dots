@@ -12,22 +12,42 @@
             {
                 console.log('DOM loaded and ready to be manipulated.');
                 
-                var puzzle = document.querySelector("#puzzle"); // Get element that has id set to "puzzle"
-                puzzle.addEventListener("click", placeDot, true); // Add event listener to element that has "puzzle" id
-                
-                function placeDot(event)
+                var canvas = document.getElementById("canvas"); // Get element that has id set to "canvas"
+                var ctx = canvas.getContext("2d"); // 2D Graphics context
+                canvas.addEventListener("click", placeDot, true); // Add event listener to element that has "canvas" id
+                                
+                function placeDot(e)
                 {
-                    // TODO: May want to normalize the coordinates relative to the puzzle area
-                    var xCoordinate = event.clientX; // Get x-coordinate of click
-                    var yCoordinate = event.clientY; // Get y-coordinate of click
+                    var rect = canvas.getBoundingClientRect();
+                    var parentPosition = getPosition(e.currentTarget);
+    
+                    // TODO: May want to normalize the coordinates relative to the puzzle area    
+                    var xCoordinate = e.clientX - parentPosition.x - rect.left; // Get x-coordinate of click
+                    var yCoordinate = e.clientY - parentPosition.y - rect.top; // Get y-coordinate of click
                     console.log("(X, Y) = (" + xCoordinate + ", " + yCoordinate + ")"); 
-                }          
+                    
+                    ctx.fillRect(xCoordinate,yCoordinate ,1,1); // Draw dot on canvas
+                }
+                
+                function getPosition(element) {
+    var xPosition = 0;
+    var yPosition = 0;
+      
+    while (element) {
+        xPosition += (element.offsetLeft - element.scrollLeft + element.clientLeft);
+        yPosition += (element.offsetTop - element.scrollTop + element.clientTop);
+        element = element.offsetParent;
+    }
+    return { x: xPosition, y: yPosition };
+}
             });
         </script>
     </head>
     <body>
         <div id="puzzle" class="dotbox">
-            <canvas id="tutorial" style="border: 1px solid black;height: 100%; width: 100%"></canvas>
+            <canvas id="canvas">
+                
+            </canvas>
         </div>
         
         <div class="buttonbox">

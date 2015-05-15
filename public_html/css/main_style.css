@@ -19,6 +19,14 @@ div.dotbox
     /*border: 1px solid black;*/
 }
 
+/*Contained within div.dotbox element*/
+#canvas
+{
+    border: 1px solid black;
+    height: 100%; 
+    width: 100%;
+}
+
 div.buttonbox
 {
      height: 5%;
