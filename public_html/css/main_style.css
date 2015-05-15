@@ -8,11 +8,27 @@ and open the template in the editor.
     Author     : rayedchan
 */
 
+html, body
+{
+    height: 100%;
+}
+
+div.dotbox
+{
+    height: 90%;
+    /*border: 1px solid black;*/
+}
+
+div.buttonbox
+{
+    height: 10%;
+    /*border:1px solid black;*/
+}
+
 /* Place button on the bottom center of the page and adjust size of submit button */ 
 .button
 {
-    position: absolute;
-    bottom: 5%;
+    position: relative;
     left: 50%;
     margin-left:-95px;
     height: 40px;

@@ -10,12 +10,27 @@
             // Ensure entire page is rendered in the browser before JS code is executed
             $(document).ready(function()
             {
-                console.log('Executing');
+                console.log('DOM loaded and ready to be manipulated.');
+                
+                document.addEventListener("click", placeDot, true);
+                
+                function placeDot(event)
+                {
+                    var xCoordinate = event.clientX;
+                    var yCoordinate = event.clientY;
+                    console.log("(X, Y) = (" + xCoordinate + ", " + yCoordinate + ")"); 
+                }
+                
+                
             });
         </script>
     </head>
     <body>
-        <div>
+        <div class="dotbox">
+ 
+        </div>
+        
+        <div class="buttonbox">
             <input class="button" type="button" id="submit" value="Solve" />
         </div>
     </body>
