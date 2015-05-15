@@ -14,21 +14,25 @@
                 
                 var canvas = document.getElementById("canvas"); // Get element that has id set to "canvas"
                 var ctx = canvas.getContext("2d"); // 2D Graphics context
-                fitToContainer(canvas); // call method to adjust to the size of the div container
+                fitToContainer(canvas); // call method to adjust canvas to the size of the div container
                                 
                 canvas.addEventListener("click", placeDot, true); // Add event listener to place dots on canvas whenever a click happens on canvas box
                 
-                // Use Set data structure to ensure dots coordinates are unique
-                var dotSet = new Set();
-                               
-                // Iterate set entries with forEach
-                dotSet.forEach(function(value) 
-                {
-                    console.log(value);
-                });
+                // Array that contains all the unique dots
+                var dotSet = [];
                 
-               
-
+                // Determine whether submit button is clicked
+                document.getElementById('submit').onclick = function()
+                {
+                    console.log("Number of dot elements: " + dotSet.length);
+                    
+                    // Iterate set entries with forEach
+                    dotSet.forEach(function(value) 
+                    {
+                        console.log(value);
+                    });
+                }
+                
                 /**
                  * Method to place a dot on the {x-coordinate, y-coordinate}, which 
                  * is determined by the location of the click.
@@ -49,7 +53,18 @@
                     
                     // Add dot object to Set
                     var dotObject = {x: xCoordinate, y: yCoordinate}; // store the x and y coordinates of a dot
-                    dotSet.add(dotObject);
+                    
+                    // Determine if dot object already exists in array
+                    var doesDotObjExist = dotSet.some(function(curDotObj)
+                    {
+                        return curDotObj.x === dotObject.x && curDotObj.y === dotObject.y;
+                    });
+                    
+                    // Only add unique dot object to set
+                    if(!doesDotObjExist)
+                    {
+                        dotSet.push(dotObject);
+                    }
                 }
                 
                 /**
