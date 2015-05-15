@@ -14,39 +14,88 @@
                 
                 var canvas = document.getElementById("canvas"); // Get element that has id set to "canvas"
                 var ctx = canvas.getContext("2d"); // 2D Graphics context
-                canvas.addEventListener("click", placeDot, true); // Add event listener to element that has "canvas" id
+                fitToContainer(canvas); // call method to adjust to the size of the div container
                                 
+                canvas.addEventListener("click", placeDot, true); // Add event listener to place dots on canvas whenever a click happens on canvas box
+                
+                // Use Set data structure to ensure dots coordinates are unique
+                var dotSet = new Set();
+                               
+                // Iterate set entries with forEach
+                dotSet.forEach(function(value) 
+                {
+                    console.log(value);
+                });
+                
+               
+
+                /**
+                 * Method to place a dot on the {x-coordinate, y-coordinate}, which 
+                 * is determined by the location of the click.
+                 * @type Arguments
+                 */
                 function placeDot(e)
                 {
-                    var rect = canvas.getBoundingClientRect();
+                    // Normalize the coordinates relative to the canvas area   
                     var parentPosition = getPosition(e.currentTarget);
     
-                    // TODO: May want to normalize the coordinates relative to the puzzle area    
-                    var xCoordinate = e.clientX - parentPosition.x - rect.left; // Get x-coordinate of click
-                    var yCoordinate = e.clientY - parentPosition.y - rect.top; // Get y-coordinate of click
+                    // Get the x-coordinate and y-coordinate of the click
+                    var xCoordinate = e.clientX - parentPosition.x; // Get x-coordinate of click
+                    var yCoordinate = e.clientY - parentPosition.y; // Get y-coordinate of click
                     console.log("(X, Y) = (" + xCoordinate + ", " + yCoordinate + ")"); 
                     
-                    ctx.fillRect(xCoordinate,yCoordinate ,1,1); // Draw dot on canvas
+                    // Draw dot that is 5 pixels wide and 5 pixels high on canvas
+                    ctx.fillRect(xCoordinate, yCoordinate , 5, 5);
+                    
+                    // Add dot object to Set
+                    var dotObject = {x: xCoordinate, y: yCoordinate}; // store the x and y coordinates of a dot
+                    dotSet.add(dotObject);
                 }
                 
-                function getPosition(element) {
-    var xPosition = 0;
-    var yPosition = 0;
-      
-    while (element) {
-        xPosition += (element.offsetLeft - element.scrollLeft + element.clientLeft);
-        yPosition += (element.offsetTop - element.scrollTop + element.clientTop);
-        element = element.offsetParent;
-    }
-    return { x: xPosition, y: yPosition };
-}
+                /**
+                 * This method is used to normalize the x-coordinate and y-coordinate relative to an area
+                 * rather than the entire page.
+                 * @param {type} element
+                 * @returns {undefined}
+                 */
+                function getPosition(element) 
+                {
+                    var xPosition = 0;
+                    var yPosition = 0;
+
+                    while (element) 
+                    {
+                        xPosition += (element.offsetLeft - element.scrollLeft + element.clientLeft);
+                        yPosition += (element.offsetTop - element.scrollTop + element.clientTop);
+                        element = element.offsetParent;
+                    }
+                    
+                    return { x: xPosition, y: yPosition };
+                }
+        
+                /**
+                 * Method to adjust the canvas size according to the parent element
+                 * @param {type} canvas
+                 * @returns {undefined}
+                 */
+                function fitToContainer(canvas)
+                {
+                  // Make it visually fill the positioned parent
+                  canvas.style.width ='100%';
+                  canvas.style.height='100%';
+                  
+                  // ...then set the internal size to match
+                  canvas.width  = canvas.offsetWidth;
+                  canvas.height = canvas.offsetHeight;
+                }
             });
+            
+            
         </script>
     </head>
     <body>
         <div id="puzzle" class="dotbox">
             <canvas id="canvas">
-                
             </canvas>
         </div>
         

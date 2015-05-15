@@ -10,37 +10,35 @@ and open the template in the editor.
 
 html, body
 {
-    height: 100%;
+    height: 95%;
 }
 
 div.dotbox
 {
-    height: 80%;
+    height: 85%;
     /*border: 1px solid black;*/
 }
 
-/*Contained within div.dotbox element*/
 #canvas
 {
-    border: 1px solid black;
-    height: 100%; 
-    width: 100%;
+    /*border: 1px solid black;*/
+    /*height: 100%; 
+    width: 100%;*/
 }
 
 div.buttonbox
 {
-     height: 5%;
-    /*border:1px solid black;*/
+     height: 10%;
+     /*border: 1px solid black;*/
 }
 
-/* Place button on the bottom center of the page and adjust size of submit button */ 
 .button
 {
     position: relative;
     top: 50%;
     left: 50%;
-    margin-left:-80px;
     height: 35px;
     width: 160px;
     font-size: 20px;
+    margin: -35px -80px; 
 }
