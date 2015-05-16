@@ -29,7 +29,7 @@ div.dotbox
 div.buttonbox
 {
      height: 10%;
-     border: 1px solid black;
+     /*border: 1px solid black;*/
 }
 
 .button
