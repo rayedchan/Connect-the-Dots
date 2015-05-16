@@ -10,5 +10,4 @@ Implemented using JavaScript and JQuery. The program can be ran by viewing the "
 ### Overview  ###
 
 1. Given N points, permutate all the point-point (line segments) relations and all the possible cycle graphs that can be formulated. (TODO: May consider using Steinhaus–Johnson–Trotter algorithm to get all permutations since current implementation is convoluted and there are too much allocation of these temporary objects.)
-
 2. For each permutation of a cycle graph, check to see if there are any intersection among the cycle graph's line segments excluding line segments connected by endpoint to endpoint. (TODO: Cleanup Line Segment Intersection algorithm). When a solution is found, call the Canvas APIs to make the lines.
