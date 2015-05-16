@@ -15,9 +15,8 @@
                 
                 var canvas = document.getElementById("canvas"); // Get element that has id set to "canvas"
                 var ctx = canvas.getContext("2d"); // 2D Graphics context
-                fitToContainer(canvas); // call method to adjust canvas to the size of the div container
-                                
-                canvas.addEventListener("click", placeDot, true); // Add event listener to place dots on canvas whenever a click happens on canvas box
+                fitToContainer(canvas); // call method to adjust canvas to the size of the div container 
+                canvas.addEventListener("click", placeDot); // Add event listener to place dots on canvas whenever a click happens on canvas box
                 
                 // Array that contains all the unique dots
                 var dotSet = [];
@@ -147,28 +146,33 @@
                     var submitBtn = document.getElementById("submit");
                     submitBtn.setAttribute("id", "reset");
                     submitBtn.setAttribute("value", "Reset");
-                    document.getElementById("reset").onclick = reset;                    
+                    document.getElementById("reset").onclick = reset;
+                    
+                    // Remove listener so user cannot modify results
+                    canvas.removeEventListener("click", placeDot);
                 };
                 
                 function reset()
                 {
                     // Clean up
                     dotSet.length = 0;
-                        permArr.length = 0;
-                        usedChars.length = 0;
-                        initialOrder.length = 0;
+                    permArr.length = 0;
+                    usedChars.length = 0;
+                    initialOrder.length = 0;
                         
-                        // Clear canvas
-                        ctx.clearRect ( 0 , 0 , canvas.width, canvas.height );
+                    // Clear canvas
+                    ctx.clearRect ( 0 , 0 , canvas.width, canvas.height );
                         
-                         // Replace reset button with submit button functionality
+                    // Replace reset button with submit button functionality
                     var resetBtn = document.getElementById("reset");
                     resetBtn.setAttribute("id", "submit");
                     resetBtn.setAttribute("value", "Submit");
-                        document.getElementById("submit").onclick = submit;
-                    };
+                    document.getElementById("submit").onclick = submit;
+                    
+                    // Add listener
+                    canvas.addEventListener("click", placeDot); // Add event listener to place dots on canvas whenever a click happens on canvas box
+                };
 
-                
                 /**
                  * Connects the N dots with N lines. Each dot will have two outgoing edges.
                  * There should not be intersection of line segments. 
