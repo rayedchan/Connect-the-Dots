@@ -6,6 +6,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <link type="text/css" rel="stylesheet" href="css/main_style.css" />
         <script type="text/javascript" src="js/jquery-1.11.3.min.js"></script>
+        <script type="text/javascript" src="js/line-segments-intersect.js"></script>
         <script type="text/javascript">
             // Ensure entire page is rendered in the browser before JS code is executed
             $(document).ready(function()
@@ -31,23 +32,17 @@
                 {
                     var numDots = dotSet.length;
                     console.log("Number of dot elements: " + numDots);
-                    
-                    // Iterate dot objects with forEach
-                    /*dotSet.forEach(function(dotObj) 
-                    {
-                        console.log(dotObj);
-                    });*/
-                                    
+                                                        
                     // Populate initial order of iterating through dot array
                     for(var i = 0; i < numDots; i++)
                     {
                          initialOrder[i] = i;
                     }
                     
-                    // Generate permutations of iterating the dots array
-                    var iteratePermutations = permute(initialOrder); // 2D array
+                    // Generate permutations of iterating the dots array 
+                    var iteratePermutations = permute(initialOrder); // 2D array // TODO: This is very costly operation; and limits the program to 10 dots
                     console.log(iteratePermutations.length);
-                    //console.log(JSON.stringify(iteratePermutations));
+                    console.log(JSON.stringify(iteratePermutations)); 
                     
                     // Iterate all permutations of connecting the dots
                     for(var i = 0; i < iteratePermutations.length; i++)
@@ -93,6 +88,17 @@
                                 var line2StartY = otherEdge.pointOne.y;
                                 var line2EndX = otherEdge.pointTwo.x;
                                 var line2EndY = otherEdge.pointTwo.y;
+                                
+                                // Test if line segments are colinear
+                                var areColinear = areLineSegmentsColinear(currEdge.pointOne, currEdge.pointTwo, otherEdge.pointOne, otherEdge.pointTwo);
+                                console.log("Are Segments Colinear? " + areColinear);
+                                
+                                // Colinear detected (special case of intersection)
+                                if(areColinear)
+                                {
+                                    isCurrentSetValid = false;
+                                    break;
+                                }
                                 
                                 // Call method to test if the two edges intersect
                                 var result = checkLineIntersection(line1StartX, line1StartY, line1EndX, line1EndY, line2StartX, line2StartY, line2EndX, line2EndY);
@@ -161,7 +167,9 @@
                         }
                     } 
                     
-                    ctx.closePath(); // connect last dot with the initial dot
+                    var initPoint = dotSet[currentPerm[0]];
+                    ctx.lineTo(initPoint.x, initPoint.y); // draw line to initial point
+                    //ctx.closePath(); // connect last dot with the initial dot
                     ctx.stroke(); 
                 }           
                 
@@ -181,7 +189,7 @@
                     console.log("(X, Y) = (" + xCoordinate + ", " + yCoordinate + ")"); 
                     
                     // Draw dot that is 5 pixels wide and 5 pixels high on canvas
-                    ctx.fillRect(xCoordinate, yCoordinate, 5, 5);
+                    ctx.fillRect(xCoordinate, yCoordinate, 3, 3);
                     
                     // Add dot object to Set
                     var dotObject = {x: xCoordinate, y: yCoordinate}; // store the x and y coordinates of a dot
