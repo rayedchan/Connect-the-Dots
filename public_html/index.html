@@ -29,6 +29,10 @@
                 // Determine whether submit button is clicked
                 document.getElementById('submit').onclick = submit;
                         
+                /**
+                 * Call when the submit button is clicked
+                 * @returns {undefined}
+                 */
                 function submit()
                 {
                     var numDots = dotSet.length;
@@ -152,6 +156,11 @@
                     canvas.removeEventListener("click", placeDot);
                 };
                 
+                /**
+                 * Call when the reset button is clicked.
+                 * @param {type} currentPerm
+                 * @returns {Arguments}
+                 */
                 function reset()
                 {
                     // Clean up
