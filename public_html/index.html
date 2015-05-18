@@ -13,6 +13,7 @@
             {
                 console.log('DOM loaded and ready to be manipulated.');
                 
+                // Set up canvas
                 var canvas = document.getElementById("canvas"); // Get element that has id set to "canvas"
                 var ctx = canvas.getContext("2d"); // 2D Graphics context
                 fitToContainer(canvas); // call method to adjust canvas to the size of the div container 
@@ -26,9 +27,106 @@
                 var usedChars = [];
                 var initialOrder = [];
                                     
-                // Determine whether submit button is clicked
+                // Set onclick event on the submit button
                 document.getElementById('submit').onclick = submit;
-                        
+               
+                /**
+                 * Gets all the edge-edge relations that intersect.
+                 * The end points of the edges connecting do not consider as intersection. 
+                 * @param {type} allPossibleEdges
+                 * @returns {Array} {edgeOne: {EdgeObj}, edgeTwo: {EdgeObj}}
+                 */
+                function getAllEdgeToEdgeIntersection(allPossibleEdges)
+                {
+                    // Array that contains all the possible edges that instersect
+                    var allEdgeToEdgeIntersection = [];
+                    
+                    // Get number of edges in list
+                    var numEdges = allPossibleEdges.length;
+                    
+                    for(var i = 0; i < numEdges; i++)
+                    {
+                        for(var j = i + 1; j < numEdges; j++)
+                        {
+                            var currEdge = allPossibleEdges[i];
+                            var otherEdge = allPossibleEdges[j];
+                                                      
+                            // Line Segment One 
+                            var line1StartX = currEdge.pointOne.x;
+                            var line1StartY = currEdge.pointOne.y;
+                            var line1EndX = currEdge.pointTwo.x;
+                            var line1EndY = currEdge.pointTwo.y;
+                                
+                            // Line Segment Two
+                            var line2StartX = otherEdge.pointOne.x;
+                            var line2StartY = otherEdge.pointOne.y;
+                            var line2EndX = otherEdge.pointTwo.x;
+                            var line2EndY = otherEdge.pointTwo.y;
+                                
+                            // Test if line segments are colinear
+                            var areColinear = areLineSegmentsColinear(currEdge.pointOne, currEdge.pointTwo, otherEdge.pointOne, otherEdge.pointTwo);
+                            console.log("Are Segments Colinear? " + areColinear);
+                                
+                            // Colinear detected (special case of intersection)
+                            if(areColinear)
+                            {
+                                allEdgeToEdgeIntersection.push({edgeOne: currEdge, edgeTwo: otherEdge});
+                            }
+                                
+                            else
+                            {
+                                // Call method to test if the two edges intersect
+                                var result = checkLineIntersection(line1StartX, line1StartY, line1EndX, line1EndY, line2StartX, line2StartY, line2EndX, line2EndY);
+                                console.log(JSON.stringify(result));
+                                
+                                // Exclude intersections that are end points of either line segments
+                                if((result.x === line1StartX && result.y === line1StartY) || 
+                                    (result.x === line2StartX && result.y === line2StartY) ||
+                                    (result.x === line1EndX && result.y === line1EndY) || 
+                                    (result.x === line2EndX && result.y === line2EndY))
+                                {
+                                    continue; // skip to next edge-edge relation 
+                                }
+                           
+                                // Intersection detected
+                                if(result.onLine1 === true && result.onLine2 === true)
+                                {
+                                    allEdgeToEdgeIntersection.push({edgeOne: currEdge, edgeTwo: otherEdge});
+                                }
+                            }
+                        }
+                    }
+                    
+                    return allEdgeToEdgeIntersection;
+                }
+               
+                /**
+                 * Get all the edges of a complete graph given a set of points.
+                 * N = number of dots
+                 * Formula for total edges: (N * (N - 1)) / 2
+                 * @param {Array} dotSet an array of dotObj, which is represented as {x:<value>,y:<value>} 
+                 * @returns an array of edge objects. An edge object is represented
+                 * as {pointOne: <dotObject>, pointTwo: <dotObject>}
+                 */
+                function getAllPossibleEdges(dotSet)
+                {
+                    var numDots = dotSet.length;
+                    
+                    // Array that contains all the possible edges for the given dots
+                    var allPossibleEdges = [];
+                    
+                    for(var i = 0; i < numDots; i++)
+                    {
+                        for(var j = i + 1; j < numDots; j++)
+                        {
+                            // Add edge to the array. The edge object contains two dot objects.
+                            allPossibleEdges.push({pointOne: dotSet[i], pointTwo: dotSet[j]});
+                        }
+                    }
+                    
+                    return allPossibleEdges;
+                }
+                
                 /**
                  * Call when the submit button is clicked
                  * @returns {undefined}
@@ -37,9 +135,19 @@
                 {
                     var numDots = dotSet.length;
                     console.log("Number of dot elements: " + numDots);
-                                                        
+                    
+                    var allPossibleEdges = getAllPossibleEdges(dotSet); // call method to get all possible edges given a set of dots
+                    console.log("Number of possible edges: " + allPossibleEdges.length); // Complete N graph should have (n(n-1))/2 edges
+                    console.log("All possible edges: " + JSON.stringify(allPossibleEdges));
+                    
+                    var edgeToEdgeIntersections = getAllEdgeToEdgeIntersection(allPossibleEdges); // get all edge-edge relations that form intersections
+                    console.log("Edge-Edge Intersections: " + JSON.stringify(edgeToEdgeIntersections));
+                    
+                    var solution = [];
+                    
+                    
                     // Populate initial order of iterating through dot array
-                    for(var i = 0; i < numDots; i++)
+                    /*for(var i = 0; i < numDots; i++)
                     {
                          initialOrder[i] = i;
                     }
@@ -144,7 +252,7 @@
                             connectTheDots(currentPerm);
                             break;
                         }
-                    }
+                    }*/
                     
                     // Replace submit button with reset button functionality
                     var submitBtn = document.getElementById("submit");
@@ -219,9 +327,11 @@
                 }           
                 
                 /**
-                 * Method to place a dot on the {x-coordinate, y-coordinate}, which 
-                 * is determined by the location of the click.
-                 * @type Arguments
+                 * Method to place a dot {x-coordinate, y-coordinate} on the canvas grid, which 
+                 * is determined by the location of the click. This will also populate
+                 * the dotSet<DotObject> array, where DotObject is represented as
+                 * {x: <SomeValue>, y: <someValue>}. 
+                 * @param e element
                  */
                 function placeDot(e)
                 {
