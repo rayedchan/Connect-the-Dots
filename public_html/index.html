@@ -23,7 +23,6 @@
                 
                 // Used to determine to stop permutations because a solution is found
                 var stop = false;
-                var count = 0;
                                     
                 // Determine whether submit button is clicked
                 document.getElementById('submit').onclick = submit;
@@ -64,7 +63,7 @@
                  * @param {List} perm An array to permute
                  * @param {Function} func   Custom function to use in method 
                  */
-                function permute(perm, func)
+                /*function permute(perm, func) // BUG with this
                 {
                     var total = factorial(perm.length); // call method to get the toal number of permutations
                     console.log("Total Permutations: " + total);
@@ -100,6 +99,63 @@
                             swap(perm, perm.length-1, perm.length-2);
                         }
                     }
+                }*/
+        
+                function permute(array) 
+                {
+                    // Identity
+                    if(!array.length) 
+                    {
+                        return [];
+                    }
+    
+                    var ret = [array],
+                        len = array.length,
+                        modlen = len - 1,
+                        mover = array[modlen],
+                        which,
+                        subset = permute(array.slice(0, -1)),
+                        permlen = subset.length;
+    
+                    for(var iy = 0; iy < permlen; iy++)
+                    {
+                        which = subset[iy];
+                        if(iy % 2) 
+                        {
+                            for(var ix = 0; ix <= modlen; ix ++) 
+                            {
+                                ret.push(which.slice(0, ix).concat([mover], which.slice(ix)));
+                                
+                                /*if(permlen === dotSet.length)
+                                {
+                                    func.call(which.slice(0, ix).concat([mover], which.slice(ix)));
+                                    if (stop === true)
+                                    {
+                                        return;
+                                    }
+                                }*/
+                            }
+                        } 
+
+                        else 
+                        {
+                            for(var ix = modlen - 1; ix >= 0; ix --) 
+                            {
+                                ret.push(which.slice(0, ix).concat([mover], which.slice(ix)));
+                                
+                                /*if(permlen === dotSet.length)
+                                {
+                                    func.call(which.slice(0, ix).concat([mover], which.slice(ix)));
+                                    if (stop === true)
+                                    {
+                                        return;
+                                    }
+                                }*/
+                            }
+                        }
+                    }
+                    
+                    return ret;
                 }
                 
                 /**
@@ -107,15 +163,20 @@
                  * This method determines if the path is a valid solution.
                  * If the path is valid, connect the dots in the UI to create
                  * the closed shape or cycle.
-                 * @returns {undefined}
+                 * @param keyOrderingSet Represents ordering to iterate dot set
                  */
-                function testAnOrderOfDotSet()
+                function testAnOrderOfDotSet(keyOrderingSet)
                 {
-                    count++;
-                    var currentPerm = this; // Get current ordering to iterate dotSet
+                    var currentPerm = keyOrderingSet; // Get current ordering to iterate dotSet
                     var currentPermLength = currentPerm.length; 
                     console.log(JSON.stringify(currentPerm));
-                        
+                    
+                    // Trivial cases 
+                    if(currentPermLength <= 2)
+                    {
+                        return;
+                    }
+        
                     // Store the edges for the given order set (E.g DotSet = [D1,D2,D3,D4], Order=[3,0,2,1], Result = [{D4-D1},{D1-D3},{D3-D2},*{D2-D4}])
                     var edges = []; // Store edge objects which is reprsented as {pointOne: {x: 1 , y: 2 }, pointTwo: {x: 5 , y: 7}}
                         
@@ -211,16 +272,21 @@
                     {
                          orderToIterateDotSet[i] = i; // This array stores the key orderings to access the dotSet array
                     }
-                    
                     //console.log("Initial Ordering: " + JSON.stringify(orderToIterateDotSet)); // [0,1,2, ..., n - 1] where n is the number of dots
                     
-                    // Test permutations of iterating the dots array
-                    permute(orderToIterateDotSet, testAnOrderOfDotSet); // call method to test each permutation; First param = initial ordering to iterate dotSet, Second param = funtion to check an order set
+                    // Get permutations of iterating dot set (total number of cycle formed)
+                    var possibleGraphs = permute(orderToIterateDotSet);
                     
-                    // No Solution for given set
-                    if(!stop)
+                    // iterate each possible ordering set (a graph)
+                    for(var i = 0; i < possibleGraphs.length; i++)
                     {
-                        console.log("No solution found. Permutations went through: " + count);
+                        testAnOrderOfDotSet(possibleGraphs[i]); // call method to determine if solution is present
+                        
+                        if(stop)
+                        {
+                            console.log("Solution found.");
+                            break;
+                        }
                     }
                     
                     // Replace submit button with reset button functionality
@@ -243,7 +309,6 @@
                     // Clean up
                     dotSet.length = 0;
                     stop = false;
-                    count = 0;
                     
                     // Clear canvas
                     ctx.clearRect ( 0 , 0 , canvas.width, canvas.height );
