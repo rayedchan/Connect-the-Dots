@@ -21,129 +21,206 @@
                 // Array that contains all the unique dots
                 var dotSet = [];
                 
-                // Array used for permutations
-                var permArr = [];
-                var usedChars = [];
-                var initialOrder = [];
+                // Used to determine to stop permutations because a solution is found
+                var stop = false;
+                var count = 0;
                                     
                 // Determine whether submit button is clicked
                 document.getElementById('submit').onclick = submit;
+                
+                /**
+                 * Swap two elements with each other in an array
+                 * @param {List} arr
+                 * @param {Object} a
+                 * @param {Object} b
+                 * @returns {undefined} modified array
+                 */
+                function swap(arr, a, b)
+                {
+                    var temp = arr[a];
+                    arr[a] = arr[b];
+                    arr[b] = temp;
+                }
+
+                /**
+                 * Calculates the factorial N
+                 * @param {int} n
+                 * @returns {int} factorial of n
+                 */
+                function factorial(n)
+                {
+                    var val = 1;
+                    
+                    for(var i = 1; i < n; i++)
+                    {
+                        val *= i;
+                    }
+                    
+                    return val;
+                }
+
+                /**
+                 * Permutate all the possible list arrangements.
+                 * @param {List} perm An array to permute
+                 * @param {Function} func   Custom function to use in method 
+                 */
+                function permute(perm, func)
+                {
+                    var total = factorial(perm.length); // call method to get the toal number of permutations
+                    console.log("Total Permutations: " + total);
+  
+                    for (var j=0, i=0, inc=1;  j < total;  j++, inc*=-1, i+=inc) 
+                    {
+                        for (; i<perm.length-1 && i >=0; i+=inc) 
+                        { 
+                            func.call(perm); // call passed in function
+                            
+                            if(stop === true)
+                            {
+                                return;
+                            }
+                            
+                            swap (perm, i, i+1); // swap elements in array
+                        }
                         
+                        func.call(perm);
+                        
+                        if (stop === true)
+                        {
+                            return;
+                        }
+    
+                        if (inc === 1) 
+                        {
+                            swap(perm, 0,1);
+                        } 
+                        
+                        else 
+                        {
+                            swap(perm, perm.length-1, perm.length-2);
+                        }
+                    }
+                }
+                
+                /**
+                 * Called to test a set of orderings to iterate the dotSet.
+                 * This method determines if the path is a valid solution.
+                 * If the path is valid, connect the dots in the UI to create
+                 * the closed shape or cycle.
+                 * @returns {undefined}
+                 */
+                function testAnOrderOfDotSet()
+                {
+                    count++;
+                    var currentPerm = this; // Get current ordering to iterate dotSet
+                    var currentPermLength = currentPerm.length; 
+                    console.log(JSON.stringify(currentPerm));
+                        
+                    // Store the edges for the given order set (E.g DotSet = [D1,D2,D3,D4], Order=[3,0,2,1], Result = [{D4-D1},{D1-D3},{D3-D2},*{D2-D4}])
+                    var edges = []; // Store edge objects which is reprsented as {pointOne: {x: 1 , y: 2 }, pointTwo: {x: 5 , y: 7}}
+                        
+                    // Iterate the ordering to access the dotSet array 
+                    for(var j = 0; j < currentPermLength - 1; j++)
+                    {
+                        var curDotObj = dotSet[currentPerm[j]];
+                        var nextDotObj = dotSet[currentPerm[j+1]];
+                        edges.push({pointOne: curDotObj, pointTwo: nextDotObj}); // Add edge to list
+                    }
+                        
+                    // Push last and first points (edge that makes a cycle)
+                    edges.push({pointOne: dotSet[currentPerm[currentPermLength - 1]], pointTwo: dotSet[currentPerm[0]]});   
+                    //console.log(JSON.stringify(edges));
+                    
+                    // Get the number of edges
+                    var numEdges = edges.length;
+                                            
+                    // Determine if current set of edges is a solution. 
+                    // Example: Edges={E1,E2,E3,E4} => check edge-edge relations
+                    // 1. E1-E2, E1-E3, E1-E4  2. E2-E3,E2-E4  3. E3-E4  
+                    for(var a = 0; a < numEdges; a++)
+                    {
+                        var currEdge = edges[a];
+                            
+                        // check current edge with the remaining edges in array
+                        for(var b = a + 1; b < numEdges; b++)
+                        {
+                            var otherEdge = edges[b];
+                                
+                            // Line Segment One 
+                            var line1StartX = currEdge.pointOne.x;
+                            var line1StartY = currEdge.pointOne.y;
+                            var line1EndX = currEdge.pointTwo.x;
+                            var line1EndY = currEdge.pointTwo.y;
+                                
+                            // Line Segment Two
+                            var line2StartX = otherEdge.pointOne.x;
+                            var line2StartY = otherEdge.pointOne.y;
+                            var line2EndX = otherEdge.pointTwo.x;
+                            var line2EndY = otherEdge.pointTwo.y;
+                                
+                            // Test if line segments are colinear
+                            var areColinear = areLineSegmentsColinear(currEdge.pointOne, currEdge.pointTwo, otherEdge.pointOne, otherEdge.pointTwo);
+                            //console.log("Are Segments Colinear? " + areColinear);
+                                
+                            // Colinear detected (special case of intersection-overlaps)
+                            if(areColinear)
+                            {
+                                //console.log("Invalid Set: " + JSON.stringify(currentPerm));
+                                return;
+                            }
+                                
+                            // Call method to test if the two edges intersect
+                            var result = checkLineIntersection(line1StartX, line1StartY, line1EndX, line1EndY, line2StartX, line2StartY, line2EndX, line2EndY);
+                            // console.log(JSON.stringify(result));
+                                                                
+                            // Exclude intersections that are end points of either line segments
+                            if((result.x === line1StartX && result.y === line1StartY) || 
+                                (result.x === line2StartX && result.y === line2StartY) ||
+                                (result.x === line1EndX && result.y === line1EndY) || 
+                                (result.x === line2EndX && result.y === line2EndY))
+                            {
+                                continue; // skip to next edge-edge relation; since this edge-edge relation is good
+                            }
+                                
+                            // Intersection detected
+                            if(result.onLine1 === true && result.onLine2 === true)
+                            {
+                                //console.log("Invalid Set: " + JSON.stringify(currentPerm));
+                                return;
+                            }
+                        }
+                    }
+                        
+                    console.log("Solution to iterate dot list: " + JSON.stringify(currentPerm));
+                    connectTheDots(currentPerm); // call function to draw the edges on UI
+                    stop = true; // global to indicate to stop permutating all the paths ordering
+                }
+                
                 /**
                  * Call when the submit button is clicked
                  * @returns {undefined}
                  */
                 function submit()
                 {
-                    var numDots = dotSet.length;
+                    var numDots = dotSet.length; // Get number of dots
+                    var orderToIterateDotSet = []; // This array contains the order to iterate the dotset. E.g. [1,3,0,2] = dotSet[1], dotSet[3], dotSet[0], dotSet[2], *Loop back to dotSet*
                     console.log("Number of dot elements: " + numDots);
                                                         
                     // Populate initial order of iterating through dot array
                     for(var i = 0; i < numDots; i++)
                     {
-                         initialOrder[i] = i;
+                         orderToIterateDotSet[i] = i; // This array stores the key orderings to access the dotSet array
                     }
                     
-                    // Generate permutations of iterating the dots array 
-                    var iteratePermutations = permute(initialOrder); // 2D array // TODO: This is very costly operation; and limits the program to 10 dots
-                    console.log(iteratePermutations.length);
-                    console.log(JSON.stringify(iteratePermutations)); 
+                    //console.log("Initial Ordering: " + JSON.stringify(orderToIterateDotSet)); // [0,1,2, ..., n - 1] where n is the number of dots
                     
-                    // Iterate all permutations of connecting the dots
-                    for(var i = 0; i < iteratePermutations.length; i++)
+                    // Test permutations of iterating the dots array
+                    permute(orderToIterateDotSet, testAnOrderOfDotSet); // call method to test each permutation; First param = initial ordering to iterate dotSet, Second param = funtion to check an order set
+                    
+                    // No Solution for given set
+                    if(!stop)
                     {
-                        var currentPerm = iteratePermutations[i];
-                        //console.log(JSON.stringify(currentPerm));
-                        
-                        // Store the edges for one permutation of closed shape
-                        var edges = []; // {pointOne: {x: 1 , y: 2 }, pointTwo: {x: 5 , y: 7}}
-                        
-                        // Iterate a single permutation of connecting the dot
-                        for(var j = 0; j < currentPerm.length - 1; j++)
-                        {
-                            var curDotObj = dotSet[currentPerm[j]];
-                            var nextDotObj = dotSet[currentPerm[j+1]];
-                            edges.push({pointOne: curDotObj, pointTwo: nextDotObj});
-                        }
-                        
-                        // Push last and first points (edge that makes a cycle)
-                        edges.push({pointOne: dotSet[currentPerm[currentPerm.length - 1]], pointTwo: dotSet[currentPerm[0]]});
-                        //console.log(JSON.stringify(edges));
-                        
-                        var isCurrentSetValid = true;
-                        
-                        // Determine if current set of edges is a solution
-                        for(var a = 0; a < edges.length; a++)
-                        {
-                            var currEdge = edges[a];
-                            
-                            // check current edge with the remaining edges in array
-                            for(var b = a + 1; b < edges.length; b++)
-                            {
-                                var otherEdge = edges[b];
-                                
-                                // Line Segment One 
-                                var line1StartX = currEdge.pointOne.x;
-                                var line1StartY = currEdge.pointOne.y;
-                                var line1EndX = currEdge.pointTwo.x;
-                                var line1EndY = currEdge.pointTwo.y;
-                                
-                                // Line Segment Two
-                                var line2StartX = otherEdge.pointOne.x;
-                                var line2StartY = otherEdge.pointOne.y;
-                                var line2EndX = otherEdge.pointTwo.x;
-                                var line2EndY = otherEdge.pointTwo.y;
-                                
-                                // Test if line segments are colinear
-                                var areColinear = areLineSegmentsColinear(currEdge.pointOne, currEdge.pointTwo, otherEdge.pointOne, otherEdge.pointTwo);
-                                console.log("Are Segments Colinear? " + areColinear);
-                                
-                                // Colinear detected (special case of intersection)
-                                if(areColinear)
-                                {
-                                    isCurrentSetValid = false;
-                                    break;
-                                }
-                                
-                                // Call method to test if the two edges intersect
-                                var result = checkLineIntersection(line1StartX, line1StartY, line1EndX, line1EndY, line2StartX, line2StartY, line2EndX, line2EndY);
-                                console.log(JSON.stringify(result));
-                                
-                                // Exclude intersections that are end points of a line segment 
-                                // In order words, ensure intersection point is not in the dots list  
-                                var isIntersectionPointAnEndPoint = dotSet.some(function(curDotObj)
-                                {
-                                    return curDotObj.x === result.x && curDotObj.y === result.y;
-                                });
-                                //console.log(isIntersectionPointAnEndPoint);
-                                
-                                // If intersection is an endpoint of a line segment, proceed with checking solution 
-                                if(isIntersectionPointAnEndPoint)
-                                {
-                                    continue; // solution still good; skip to check next edge 
-                                }
-                                
-                                // Intersection detected
-                                if(result.onLine1 === true && result.onLine2 === true)
-                                {
-                                    isCurrentSetValid = false;
-                                    break;
-                                }
-                            }
-                            
-                            if(!isCurrentSetValid)
-                            {
-                                break;
-                            }
-                        }
-                        
-                        // Solution founded
-                        if(isCurrentSetValid)
-                        {
-                            console.log("Solution to iterate dot list: " + JSON.stringify(currentPerm));
-                            connectTheDots(currentPerm);
-                            break;
-                        }
+                        console.log("No solution found. Permutations went through: " + count);
                     }
                     
                     // Replace submit button with reset button functionality
@@ -165,10 +242,9 @@
                 {
                     // Clean up
                     dotSet.length = 0;
-                    permArr.length = 0;
-                    usedChars.length = 0;
-                    initialOrder.length = 0;
-                        
+                    stop = false;
+                    count = 0;
+                    
                     // Clear canvas
                     ctx.clearRect ( 0 , 0 , canvas.width, canvas.height );
                         
@@ -193,29 +269,38 @@
                     ctx.beginPath(); // Creates a new path 
                     var initialDotObjSet = true;
                     
-                    // Iterate dot array by in the order of the permutation array, which contains the indices
-                    for(var z = 0; z < currentPerm.length; z++)
+                    // Trivial cases
+                    if(currentPerm === null || currentPerm.length <= 2)
                     {
-                        dotObj = dotSet[currentPerm[z]];
-                        
-                        // Set initial coordinate point
-                        if(initialDotObjSet)
-                        {
-                            ctx.moveTo(dotObj.x, dotObj.y); // initial position of pen
-                            initialDotObjSet = false;
-                        }
-                        
-                        // Draw line from current point to destination point
-                        else
-                        {
-                            ctx.lineTo(dotObj.x, dotObj.y); // draw straight line to this dot 
-                        }
-                    } 
+                        console.log("No Solution");
+                    }
                     
-                    var initPoint = dotSet[currentPerm[0]];
-                    ctx.lineTo(initPoint.x, initPoint.y); // draw line to initial point
-                    //ctx.closePath(); // connect last dot with the initial dot
-                    ctx.stroke(); 
+                    else
+                    {
+                        // Iterate dot array by in the order of the permutation array, which contains the indices
+                        for(var z = 0; z < currentPerm.length; z++)
+                        {
+                            dotObj = dotSet[currentPerm[z]];
+
+                            // Set initial coordinate point
+                            if(initialDotObjSet)
+                            {
+                                ctx.moveTo(dotObj.x, dotObj.y); // initial position of pen
+                                initialDotObjSet = false;
+                            }
+
+                            // Draw line from current point to destination point
+                            else
+                            {
+                                ctx.lineTo(dotObj.x, dotObj.y); // draw straight line to this dot 
+                            }
+                        } 
+                    
+                        var initPoint = dotSet[currentPerm[0]];
+                        ctx.lineTo(initPoint.x, initPoint.y); // draw line to initial point
+                        //ctx.closePath(); // connect last dot with the initial dot
+                        ctx.stroke(); 
+                    }
                 }           
                 
                 /**
@@ -307,33 +392,6 @@
                     return result;
                 }
                 
-                /**
-                 * Permute an array 
-                 * @type input array of integers 
-                 * @return 2D array with all permutations
-                 */
-                function permute(input) 
-                {
-                    var i, ch;
-                    
-                    for (i = 0; i < input.length; i++) 
-                    {
-                        ch = input.splice(i, 1)[0];
-                        usedChars.push(ch);
-    
-                        if (input.length == 0) 
-                        {
-                            permArr.push(usedChars.slice());
-                        }
-    
-                        permute(input);
-                        input.splice(i, 0, ch);
-                        usedChars.pop();                  
-                    }
-                    
-                    return permArr;
-                }
-
                 /**
                  * This method is used to normalize the x-coordinate and y-coordinate relative to an area
                  * rather than the entire page.
