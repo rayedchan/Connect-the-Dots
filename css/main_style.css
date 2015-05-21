@@ -1,0 +1,44 @@
+/*
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+*/
+/* 
+    Created on : May 14, 2015, 10:16:36 PM
+    Author     : rayedchan
+*/
+
+html, body
+{
+    /*height: 95%;*/
+}
+
+div.dotbox
+{
+    height: 400px;
+    /*border: 1px solid black;*/
+}
+
+#canvas
+{
+    border: 1px solid black;
+    /*height: 100%; 
+    width: 100%;*/
+}
+
+div.buttonbox
+{
+     height: 80px;
+     /*border: 1px solid black;*/
+}
+
+.button
+{
+    position: relative;
+    top: 50%;
+    left: 50%;
+    height: 35px;
+    width: 160px;
+    font-size: 20px;
+    margin: -35px -80px; 
+}
