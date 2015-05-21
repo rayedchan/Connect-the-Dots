@@ -8,7 +8,7 @@ Implemented using JavaScript and JQuery. The program can be ran by viewing the "
 * Dot placement will not be placed on the location of the mouse click if the user happens to re-size the browser. The users would have refresh the page if a specific window size is desired.
 
 ### Overview  ###
-This uses a brute force algorithm that generates all the possible graphs made from a given set of dots. 
+This uses a brute force algorithm that generates all the possible graphs made from a given set of dots. Then uses the "Line Segment to Line Segment Intersection" algorithm to determine if the given graph has any intersections. 
 
 1. Given N points, permute all the point-point (line segments) relations and all the possible cycle graphs that can be formulated.
 
